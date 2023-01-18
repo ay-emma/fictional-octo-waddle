@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_app/ui/common/ui_helpers.dart';
+import 'package:stacked_services/stacked_services.dart';
 
+import '../../../app/app.locator.dart';
+import '../../../app/app.router.dart';
 import 'home_viewmodel.dart';
 
 class HomeView extends StackedView<HomeViewModel> {
-  const HomeView({Key? key}) : super(key: key);
+  HomeView({Key? key}) : super(key: key);
+
+  final _navigationService = locator<NavigationService>();
 
   @override
   Widget builder(
@@ -25,24 +29,34 @@ class HomeView extends StackedView<HomeViewModel> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: ((context, index) {
-                          User user = snapshot.data![index];
-                          return ListTile(
-                            title: Text(user.name),
-                            subtitle: Text(user.email),
-                            leading: CircleAvatar(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: ((context, index) {
+                        User user = snapshot.data![index];
+                        return ListTile(
+                          onTap: () {
+                            _navigationService.navigateToDetailsView(
+                              user: user,
+                              index: index,
+                            );
+                          },
+                          title: Text(user.name),
+                          subtitle: Text(user.email),
+                          leading: Hero(
+                            tag: "ph+$index",
+                            child: CircleAvatar(
                               backgroundImage: NetworkImage(user.picture),
                             ),
-                          );
-                        }));
+                          ),
+                        );
+                      }),
+                    );
                   }
 
                   if (snapshot.hasError) {
                     return const Text("Error");
                   }
 
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 })),
       ),
     );
